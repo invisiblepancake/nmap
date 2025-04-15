@@ -1554,8 +1554,7 @@ const u8 *readip_pcap(pcap_t *pd, unsigned int *len, long to_usec,
   if (offset && linknfo) {
     linknfo->datalinktype = datalink;
     linknfo->headerlen = offset;
-    assert(offset <= MAX_LINK_HEADERSZ);
-    memcpy(linknfo->header, p - offset, MIN(sizeof(linknfo->header), offset));
+    linknfo->header = p;
   }
   if (rcvdtime)
     PacketTrace::trace(PacketTrace::RCVD, (u8 *) p, *len,
@@ -1610,7 +1609,7 @@ int setTargetMACIfAvailable(Target *target, struct link_header *linkhdr,
   if (!linkhdr || !target || !src)
     return 1;
 
-  if (linkhdr->datalinktype != DLT_EN10MB || linkhdr->headerlen != 14)
+  if (linkhdr->datalinktype != DLT_EN10MB || linkhdr->headerlen < 14)
     return 2;
 
   if (!overwrite && target->MACAddress())
